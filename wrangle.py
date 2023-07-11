@@ -20,7 +20,7 @@ def zillow_data():
         return get_zillow_data()
 
 def get_zillow_data():
-    #this sql code for answers 
+    #this sql Query
     sql_query = """SELECT
     bedroomcnt,
     bathroomcnt,
@@ -41,9 +41,6 @@ WHERE
     return df
 
 def prep_zillow(df):
-    '''
-    pulled from prepare.py
-    '''
     df = df.drop('propertylandusetypeid', axis=1)
     #change column names to be more readable
     df = df.rename(columns={'bedroomcnt':'bedrooms','bathroomcnt':'bathrooms', 'calculatedfinishedsquarefeet':'sqft', 'taxvaluedollarcnt':'home_value', 'taxamount':'sale_tax', 'yearbuilt':'year_built'})
@@ -51,11 +48,10 @@ def prep_zillow(df):
     df = df.dropna()
     #drop duplicates
     df.drop_duplicates(inplace=True)
-   
     return df
 
 def drop_propertylandusetypeid(df):
-    df = df.drop('propertylandusetypeid', axis=1)
+    df = df.drop('propertylandusetypeid')
     return df
 
 def drop_nulls(df):
@@ -94,11 +90,10 @@ def remove_outliers(df):
     return df   
 
 def split_zillow(df):
-    #df = train_validate_test(df)
-    #stratify is used for categorical data we are using fips(Ventura, Orange Cty and Los Angelos)
-    train_validate, test = train_test_split(df, test_size=0.2, random_state=123, stratify=df.fips)
-    train, validate = train_test_split(train_validate, test_size=0.25, random_state=123, stratify=train_validate.fips)
+    train_validate, test = train_test_split(df, test_size=0.2, random_state=123, stratify=df['fips'].values)
+    train, validate = train_test_split(train_validate, test_size=0.25, random_state=123, stratify=train_validate['fips'].values)
     return train, validate, test
+
 
     
     
