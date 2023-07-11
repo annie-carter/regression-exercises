@@ -5,10 +5,10 @@ def split_zillow(df):
     train, validate = train_test_split(train_validate, test_size=0.25, random_state=123, stratify=train_validate.fips)
     return train, validate, test
 
-def x_y_split(zillow_train,zillow_validate,zillow_test):
-    x_train, y_train = zillow_train.select_dtypes('float').drop(columns='taxvalue'),zillow_train.taxvalue
-    x_validate, y_validate = zillow_validate.select_dtypes('float').drop(columns='taxvalue'),zillow_validate.taxvalue
-    x_test, y_test = zillow_test.select_dtypes('float').drop(columns='taxvalue'),zillow_test.taxvalue
+def x_y_split(train, validate, test):
+    x_train, y_train = train.select_dtypes('float').drop(columns='home_value'), train.home_value
+    x_validate, y_validate = validate.select_dtypes('float').drop(columns='hom_value'),validate.home_value
+    x_test, y_test = test.select_dtypes('float').drop(columns='home_value'), test.home_value
     return x_train, y_train,x_validate,y_validate,x_test,y_test
-def models(y_train):
-    models= pd.DataFrame(
+
+

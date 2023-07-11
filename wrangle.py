@@ -42,16 +42,13 @@ WHERE
 
 def prep_zillow(df):
     '''
-    Used for scaling ex. This function takes in the zillow df
-    then the data is cleaned and returned
+    pulled from prepare.py
     '''
     df = df.drop('propertylandusetypeid', axis=1)
     #change column names to be more readable
     df = df.rename(columns={'bedroomcnt':'bedrooms','bathroomcnt':'bathrooms', 'calculatedfinishedsquarefeet':'sqft', 'taxvaluedollarcnt':'home_value', 'taxamount':'sale_tax', 'yearbuilt':'year_built'})
-
-    #drop null values- at most there were 9000 nulls (this is only 0.5% of 2.1M)
+    #drop null values- at most there were 9000 nulls
     df = df.dropna()
-
     #drop duplicates
     df.drop_duplicates(inplace=True)
    
@@ -69,12 +66,7 @@ def remove_nobed_nobath(df):
     df = df[(df.bedrooms != 0) & (df.bathrooms != 0) & (df.sqft >= 70)]
     return df
 
-def remove_outliers(df):
-    #eliminate outliers
-    df = df[df.bathrooms <= 6]
-    df = df[df.bedrooms <= 6]
-    df = df[df.home_value < 2_000_000]
-    return df
+
 
 def wrangled_zillow(df):
     df = remove_nobed_nobath(df)
@@ -93,7 +85,13 @@ def dtype_zillow(df):
     df['year_built'] = df['year_built'].astype(int).astype(str)
     df['fips'] = df['fips'].astype(int).astype(str)   
     return df
-    
+
+def remove_outliers(df):
+    #eliminate outliers
+    df = df[df.bathrooms <= 9]
+    df = df[df.bedrooms <= 8]
+    df = df[df.home_value < 2_000_000]
+    return df   
 
 def split_zillow(df):
     #df = train_validate_test(df)
