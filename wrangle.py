@@ -62,61 +62,45 @@ def drop_propertylandusetypeid(df):
     return df
 
 def drop_nulls(df):
-    df = df.dropna()
+    df = df.dropna(df)
     return df
 
-def drop_nobed_nobath(df):
-    df = df[(df.bedroomcnt != 0) & (df.bathroomcnt != 0) & (df.calculatedfinishedsquarefeet >= 70)]
+def remove_nobed_nobath(df):
+    df = df[(df.bedrooms != 0) & (df.bathrooms != 0) & (df.sqft >= 70)]
     return df
 
-def squish_outliers(df):
-    #take out outliers
-    df = df[df.bathroomcnt <= 6]
-    df = df[df.bedroomcnt <= 6]
-    df = df[df.taxvaluedollarcnt < 2_000_000]
+def remove_outliers(df):
+    #eliminate outliers
+    df = df[df.bathrooms <= 6]
+    df = df[df.bedrooms <= 6]
+    df = df[df.home_value < 2_000_000]
     return df
 
 def wrangled_zillow(df):
-    # df = drop_propertylandusetypeid(df)
-
-    df = drop_nulls(df)
-    df = drop_nobed_nobath(df)
-    df = squish_outliers(df)
+    df = remove_nobed_nobath(df)
+    df = remove_outliers(df)
     df.to_csv("zillow.csv", index=False)
     return df
 
+
+def dtype_zillow(df):
+    # Convert bedrooms, bathrooms, and sqft columns to integers
+    df['bedrooms'] = df['bedrooms'].astype(int)
+    df['bathrooms'] = df['bathrooms'].astype(int)
+    df['sqft'] = df['sqft'].astype(int)
+    
+    # Convert year_built and fips columns to integers and then to strings
+    df['year_built'] = df['year_built'].astype(int).astype(str)
+    df['fips'] = df['fips'].astype(int).astype(str)   
+    return df
+    
+
 def split_zillow(df):
     #df = train_validate_test(df)
+    #stratify is used for categorical data we are using fips(Ventura, Orange Cty and Los Angelos)
     train_validate, test = train_test_split(df, test_size=0.2, random_state=123, stratify=df.fips)
-    #stratify is used for categorical data
     train, validate = train_test_split(train_validate, test_size=0.25, random_state=123, stratify=train_validate.fips)
-    #Stratified by county for an even distribution on the train validate test data sets
     return train, validate, test
-    #go back and stratify properly on fips
-    
-    
-   #SCALER VISUALIZATION
-def visualize_scaler(scaler, df, columns_to_scale, bins=10):
-    #Create subsets 
-    to_scale = ['bedrooms','bathrooms','sqft','year_built','sale_tax']
-    #create subplot structure
-    fig, axs = plt.subplots(len(columns_to_scale), 2, figsize=(12,12))
 
-    #copy the df for scaling
-    df_scaled = df.copy()
     
-    #fit and transform the df
-    df_scaled[columns_to_scale] = scaler.fit_transform(df[columns_to_scale])
-
-    #plot the pre-scaled data next to the post-scaled data in one row of a subplot
-    for (ax1, ax2), col in zip(axs, columns_to_scale):
-        ax1.hist(df[col], bins=bins)
-        ax1.set(title=f'{col} before scaling', xlabel=col, ylabel='count')
-        ax2.hist(df_scaled[col], bins=bins)
-        ax2.set(title=f'{col} after scaling with {scaler.__class__.__name__}', xlabel=col, ylabel='count')
-    plt.tight_layout()
-# call function with MinMaxScaler(), StandardScaler, RobustScaler(), QuantileTransformer(output_distribution='normal') and QuantileTransformer()  for graphs
-# visualize_scaler(scaler=MinMaxScaler(), 
-#                  df=train, 
-#                  columns_to_scale=to_scale, 
-#                  bins=50)
+    
